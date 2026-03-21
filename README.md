@@ -28,12 +28,21 @@ Durante a homologação, identificou-se o erro `NT_STATUS_IO_TIMEOUT`.
 * **Solução Aplicada:** Migração para modo Bridge, whitelisting no firewalld e ajuste de booleanos do SELinux.
 
 ### Evidência Técnica
+
 **1. Acesso Efetivo e Permissões:**
-![Acesso Samba](./docs/assets/01_samba_access_success.png)
+<details>
+  <summary>📂 Clique para ver a validação de acesso Samba</summary>
+
+  ![Acesso Samba](./docs/assets/01_samba_access_success.png)
+</details>
 
 **2. Hardening de Rede e Kernel:**
-![Configuração de Firewall](./docs/assets/02_firewall_config.png)
-![Configuração SELinux](./docs/assets/03_selinux_configuration.png)
+<details>
+  <summary>📂 Clique para ver a configuração de Firewall e SELinux</summary>
+
+  ![Configuração de Firewall](./docs/assets/02_firewall_config.png)
+  ![Configuração SELinux](./docs/assets/03_selinux_configuration.png)
+</details>
 
 ---
 
@@ -50,16 +59,25 @@ Na automação do middleware, identificou-se o erro `Table doesn't exist` no scr
 ### Evidência Técnica
 
 **1. Proteção de Dados (Criptografia AES):**
-Uso de AES_ENCRYPT e VARBINARY para garantir que dados sensíveis permaneçam ilegíveis sem a chave mestra.
-![Criptografia Avançada](./docs/assets/criptografia_avancada_sha512_aes.png)
+<details>
+  <summary>📂 Clique para ver a criptografia AES no banco</summary>
+
+  ![Criptografia Avançada](./docs/assets/criptografia_avancada_sha512_aes.png)
+</details>
 
 **2. Observabilidade (Auditoria em Tempo Real):**
-Configuração do log de auditoria do MariaDB no Rocky Linux para monitoramento de todas as transações.
-![Auditoria em Tempo Real](./docs/assets/auditoria_tempo_real.png)
+<details>
+  <summary>📂 Clique para ver o log de auditoria do MariaDB</summary>
+
+  ![Auditoria em Tempo Real](./docs/assets/auditoria_tempo_real.png)
+</details>
 
 **3. Automação e Resiliência (Python Integration):**
-Script final executando o ciclo: registro de log de acesso, consulta e descriptografia de dados em tempo real.
-![Integração Python](./docs/assets/evidencia_ouro_integracao_python_mariadb.png)
+<details>
+  <summary>📂 Clique para ver a integração Python com MariaDB</summary>
+
+  ![Integração Python](./docs/assets/evidencia_ouro_integracao_python_mariadb.png)
+</details>
 
 ### Conclusão de Valor
 A arquitetura do Atlas Server assegura integridade e confidencialidade. A integração com Python permite escalar processos automatizados mantendo o rigor de segurança exigido em infraestruturas corporativas modernas.
@@ -69,15 +87,20 @@ A arquitetura do Atlas Server assegura integridade e confidencialidade. A integr
 ## 📁 Fase 3: NoSQL & Scalability (Concluído)
 
 ### Contexto do Problema
-A infraestrutura necessitava de um banco NoSQL para persistência de dados não estruturados de alta volumetria. O desafio técnico era garantir a instalação do MongoDB 7.0 no Rocky Linux sob um sistema de arquivos otimizado (XFS) e com autenticação RBAC (Role-Based Access Control) rigorosa habilitada.
+A infraestrutura necessitava de um banco NoSQL para persistência de dados não estruturados de alta volumetria. O desafio técnico era garantir a instalação do MongoDB 7.0 no Rocky Linux sob um sistema de arquivos otimizado (XFS) e com autenticação RBAC habilitada.
 
 ### Troubleshooting e Resolução
 * **Causa Raiz:** O motor de armazenamento padrão do MongoDB (WiredTiger) exige alta performance de I/O e consistência de bloco. O EXT4 tradicional poderia gerar overhead no escalonamento.
 * **Solução Aplicada:** Formatação da partição dedicada em XFS, tuning do arquivo `mongod.conf` e amarração do serviço para escutar apenas interfaces seguras da rede local.
 
 ### Evidência Técnica
+
 **1. Tuning de Storage (WiredTiger + XFS):**
-![Storage WiredTiger](./docs/assets/mongo-storage-wiredtiger-xfs.png)
+<details>
+  <summary>📂 Clique para ver a montagem XFS e WiredTiger</summary>
+
+  ![Storage WiredTiger](./docs/assets/mongo-storage-wiredtiger-xfs.png)
+</details>
 
 ---
 
@@ -88,18 +111,24 @@ Para isolar ambientes de desenvolvimento e testes, era necessário conteinerizar
 
 ### Troubleshooting e Resolução
 Durante o provisionamento do daemon do Docker, o gerenciador de pacotes padrão (`dnf`) falhou ao tentar buscar os pacotes comunitários.
-* **Causa Raiz:** Repositórios oficiais do Docker não vêm habilitados por padrão no Rocky Linux (RedHat-family).
-* **Solução Aplicada:** Ingestão manual do repositório `centos/docker-ce` via `dnf config-manager`, garantindo o pull da imagem oficial do Docker. Exposição controlada da porta `27018` para evitar conflitos de escuta com o MongoDB nativo.
+* **Causa Raiz:** Repositórios oficiais do Docker não vêm habilitados por padrão no Rocky Linux.
+* **Solução Aplicada:** Ingestão manual do repositório `centos/docker-ce` via `dnf config-manager`, garantindo o pull da imagem oficial do Docker. Exposição controlada da porta `27018`.
 
 ### Evidência Técnica
 
 **1. Autenticação e Isolamento de Contêineres:**
-Verificação do status do contêiner ativo e validação de autenticação via `mongosh` no ambiente isolado.
-![Autenticação Docker](./docs/assets/mongo-docker-container-auth.png)
+<details>
+  <summary>📂 Clique para ver a autenticação no MongoDB conteinerizado</summary>
+
+  ![Autenticação Docker](./docs/assets/mongo-docker-container-auth.png)
+</details>
 
 **2. Otimização de I/O via Operações em Lote (BulkWrite):**
-Escrita performática agrupando `insertOne`, `updateOne` e `deleteOne` em uma única requisição ao pool de conexão do Docker, poupando tráfego de rede e latência.
-![Bulk Write Operations](./docs/assets/mongo-docker-crud-bulk-ops.png)
+<details>
+  <summary>📂 Clique para ver as operações de BulkWrite performáticas</summary>
+
+  ![Bulk Write Operations](./docs/assets/mongo-docker-crud-bulk-ops.png)
+</details>
 
 ### Conclusão de Valor
 A união do MongoDB nativo em XFS com instâncias conteinerizadas em Docker fornece à arquitetura do projeto elasticidade para microsserviços e robustez de armazenamento para big data tradicional.
