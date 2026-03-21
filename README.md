@@ -7,18 +7,20 @@ Este repositório documenta a implementação de uma infraestrutura corporativa 
 O ecossistema está sendo construído de forma modular, com as seguintes fases de implantação:
 
 - [x] **Fase 1: Secure File Services** - Servidor Samba com permissões granulares e isolamento de rede.
-- [x] **Fase 2: Database Systems & Data Governance** - Implantação de MariaDB (Atlas Server), criptografia AES, auditoria e automação Python.
-- [ ] **Fase 3: NoSQL & Scalability** - Implementação de MongoDB para documentos e alta disponibilidade.
-- [ ] **Fase 4: Containerization & Orchestration** - Empacotamento via Docker e gestão de microsserviços.
-- [ ] **Fase 5: Web & Comms** - Hospedagem Apache e infraestrutura VoIP com Asterisk.
-- [ ] **Fase 6: Infrastructure as Code - IaC** - Automação com Ansible e Terraform.
+- [x] **Fase 2: Relational Databases & Governance** - MariaDB (Atlas Server) com auditoria e automação Python.
+- [x] **Fase 3: NoSQL & Scalability** - Implementação de MongoDB para documentos em XFS.
+- [x] **Fase 4: Containerization & Isolation** - Empacotamento via Docker e isolamento de ambientes de desenvolvimento.
+- [ ] **Fase 5: Cloud-Native & Orchestration** - Orquestração de microsserviços via Kubernetes.
+- [ ] **Fase 6: Web, Comms & Observability** - Webservers Apache, VoIP com Asterisk e monitoramento centralizado com Prometheus.
+- [ ] **Fase 7: Infrastructure as Code & Cache** - Automação com Ansible/Terraform e Cache de alta performance com Redis.
+- [ ] **Fase 8: Enterprise Databases (Extra)** - Administração profunda de Oracle Database e PL-SQL.
 
 ---
 
 ## 📁 Fase 1: Samba Secure Storage (Concluído)
 
 ### Contexto do Problema
-O ambiente corporativo demandava um servidor de arquivos centralizado capaz de isolar dados sensíveis entre grupos de usuários. A premissa técnica era garantir o serviço operando estritamente dentro das políticas ativas do SELinux (Permissive) e do Firewall corporativo.
+O ambiente corporativo demandava um servidor de arquivos centralizado capaz de isolar dados sensíveis entre grupos de usuários. A premissa técnica era garantir o serviço operando estritamente dentro das políticas ativas do SELinux e do Firewall corporativo.
 
 ### Troubleshooting e Resolução
 Durante a homologação, identificou-se o erro `NT_STATUS_IO_TIMEOUT`.
@@ -35,10 +37,10 @@ Durante a homologação, identificou-se o erro `NT_STATUS_IO_TIMEOUT`.
 
 ---
 
-## 📁 Fase 2: Database Systems & Data Governance (Concluído)
+## 📁 Fase 2: Relational Databases & Governance (Concluído)
 
 ### Contexto do Problema
-A infraestrutura necessitava de uma camada de persistência para dados sensíveis sob conformidade (LGPD/GDPR). O desafio era garantir proteção Data-at-Rest e rastreabilidade total de operações, impedindo acessos não autorizados mesmo por usuários com privilégios de sistema.
+A infraestrutura necessitava de uma camada de persistência para dados sensíveis sob conformidade. O desafio era garantir proteção Data-at-Rest e rastreabilidade total de operações, impedindo acessos não autorizados mesmo por usuários com privilégios de sistema.
 
 ### Troubleshooting e Resolução (Integração Python)
 Na automação do middleware, identificou-se o erro `Table doesn't exist` no script Python.
@@ -64,10 +66,40 @@ A arquitetura do Atlas Server assegura integridade e confidencialidade. A integr
 
 ---
 
-## 📁 Fase 3: NoSQL & Scalability (Em Breve)
-*(Aguardando implementação do MongoDB)*
+## 📁 Fase 3: NoSQL & Scalability (Concluído)
+
+### Contexto do Problema
+A infraestrutura necessitava de um banco NoSQL para persistência de dados não estruturados de alta volumetria. O desafio técnico era garantir a instalação do MongoDB 7.0 no Rocky Linux sob um sistema de arquivos otimizado (XFS) e com autenticação RBAC (Role-Based Access Control) rigorosa habilitada.
+
+### Troubleshooting e Resolução
+* **Causa Raiz:** O motor de armazenamento padrão do MongoDB (WiredTiger) exige alta performance de I/O e consistência de bloco. O EXT4 tradicional poderia gerar overhead no escalonamento.
+* **Solução Aplicada:** Formatação da partição dedicada em XFS, tuning do arquivo `mongod.conf` e amarração do serviço para escutar apenas interfaces seguras da rede local.
+
+### Evidência Técnica
+**1. Tuning de Storage (WiredTiger + XFS):**
+![Storage WiredTiger](./docs/assets/mongo-storage-wiredtiger-xfs.png)
 
 ---
 
-## 📁 Fase 4: Containerization (Em Breve)
-*(Aguardando implementação do Docker)*
+## 📁 Fase 4: Containerization & Isolation (Concluído)
+
+### Contexto do Problema
+Para isolar ambientes de desenvolvimento e testes, era necessário conteinerizar a stack do MongoDB sem conflitar com as portas nativas e serviços preexistentes do Rocky Linux.
+
+### Troubleshooting e Resolução
+Durante o provisionamento do daemon do Docker, o gerenciador de pacotes padrão (`dnf`) falhou ao tentar buscar os pacotes comunitários.
+* **Causa Raiz:** Repositórios oficiais do Docker não vêm habilitados por padrão no Rocky Linux (RedHat-family).
+* **Solução Aplicada:** Ingestão manual do repositório `centos/docker-ce` via `dnf config-manager`, garantindo o pull da imagem oficial do Docker. Exposição controlada da porta `27018` para evitar conflitos de escuta com o MongoDB nativo.
+
+### Evidência Técnica
+
+**1. Autenticação e Isolamento de Contêineres:**
+Verificação do status do contêiner ativo e validação de autenticação via `mongosh` no ambiente isolado.
+![Autenticação Docker](./docs/assets/mongo-docker-container-auth.png)
+
+**2. Otimização de I/O via Operações em Lote (BulkWrite):**
+Escrita performática agrupando `insertOne`, `updateOne` e `deleteOne` em uma única requisição ao pool de conexão do Docker, poupando tráfego de rede e latência.
+![Bulk Write Operations](./docs/assets/mongo-docker-crud-bulk-ops.png)
+
+### Conclusão de Valor
+A união do MongoDB nativo em XFS com instâncias conteinerizadas em Docker fornece à arquitetura do projeto elasticidade para microsserviços e robustez de armazenamento para big data tradicional.
