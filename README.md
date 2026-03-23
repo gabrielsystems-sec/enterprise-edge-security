@@ -44,6 +44,14 @@ Durante a homologação, identificou-se o erro `NT_STATUS_IO_TIMEOUT`.
   ![Configuração SELinux](./docs/assets/03_selinux_configuration.png)
 </details>
 
+**3. Troubleshooting e Validação de Daemons:**
+<details>
+  <summary>📂 Clique para ver o teste de sintaxe e validação</summary>
+
+  ![Samba Debug Syntax](./docs/assets/debug_samba_syntax_error.png)
+  ![Samba Config Validation Ok](./docs/assets/samba_config_validation_ok.png)
+</details>
+
 ---
 
 ## 📁 Fase 2: Relational Databases & Governance (Concluído)
@@ -102,6 +110,13 @@ A infraestrutura necessitava de um banco NoSQL para persistência de dados não 
   ![Storage WiredTiger](./docs/assets/mongo-storage-wiredtiger-xfs.png)
 </details>
 
+**2. Agregação Avançada e Correlação de Dados ($lookup):**
+<details>
+  <summary>📂 Clique para ver a query de agregação de segurança</summary>
+
+  ![MongoDB lookup SRE](./docs/assets/mongodb-advanced-lookup-sre.png)
+</details>
+
 ---
 
 ## 📁 Fase 4: Containerization & Isolation (Concluído)
@@ -128,6 +143,13 @@ Durante o provisionamento do daemon do Docker, o gerenciador de pacotes padrão 
   <summary>📂 Clique para ver as operações de BulkWrite performáticas</summary>
 
   ![Bulk Write Operations](./docs/assets/mongo-docker-crud-bulk-ops.png)
+</details>
+
+**3. Troubleshooting de Conflito de Portas no Daemon:**
+<details>
+  <summary>📂 Clique para ver a resolução de conflito da porta 27018</summary>
+
+  ![Conflito de Porta Docker](./docs/assets/04_resolucao_conflito_porta_causa_raiz.png)
 </details>
 
 ### Conclusão de Valor
