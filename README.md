@@ -127,7 +127,7 @@ Para isolar ambientes de desenvolvimento e testes, era necessário conteinerizar
 ### Troubleshooting e Resolução
 Durante o provisionamento do daemon do Docker, o gerenciador de pacotes padrão (`dnf`) falhou ao tentar buscar os pacotes comunitários.
 * **Causa Raiz:** Repositórios oficiais do Docker não vêm habilitados por padrão no Rocky Linux.
-* **Solução Aplicada:** Ingestão manual do repositório `centos/docker-ce` via `dnf config-manager`, garantindo o pull da imagem oficial do Docker. Exposição controlada da porta `27018`.
+* **Solução Aplicada:** Ingestão do repositório oficial do Docker (compatível via branch CentOS/RHEL) no Rocky Linux via dnf config-manager, garantindo o pull da imagem oficial. Exposição controlada da porta 27018
 
 ### Evidência Técnica
 
