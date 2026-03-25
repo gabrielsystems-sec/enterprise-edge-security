@@ -8,8 +8,8 @@ O ecossistema está sendo construído de forma modular, com as seguintes fases d
 
 - [x] **Fase 1: Secure File Services** - Servidor Samba com permissões granulares e isolamento de rede.
 - [x] **Fase 2: Relational Databases & Governance** - MariaDB (Atlas Server) com auditoria e automação Python.
-- [x] **Fase 3: NoSQL & Scalability** - Implementação de MongoDB para documentos em XFS.
-- [x] **Fase 4: Containerization & Isolation** - Empacotamento via Docker e isolamento de ambientes de desenvolvimento.
+- [x] **Fase 3: NoSQL & Scalability** - MongoDB 8.0 (XFS) + Ciclo de Vida (TTL) + Transações Atômicas.
+- [x] **Fase 4: Containerization & Isolation** - Docker + Troubleshooting de Portas + RBAC.
 - [ ] **Fase 5: Cloud-Native & Orchestration** - Orquestração de microsserviços via Kubernetes.
 - [ ] **Fase 6: Web, Comms & Observability** - Webservers Apache, VoIP com Asterisk e monitoramento centralizado com Prometheus.
 - [ ] **Fase 7: Infrastructure as Code & Cache** - Automação com Ansible/Terraform e Cache de alta performance com Redis.
@@ -87,6 +87,14 @@ Na automação do middleware, identificou-se o erro `Table doesn't exist` no scr
   ![Integração Python](./docs/assets/evidencia_ouro_integracao_python_mariadb.png)
 </details>
 
+**4. Disaster Recovery & Automation:**
+<details>
+  <summary>📂 Clique para ver a recuperação e automação de auditoria</summary>
+
+  * **Recovery Database Success:** ![Recovery Sucesso](docs/assets/08_recovery_sucesso_database.png)
+  * **Security Audit Automation:** ![Automação Auditoria](docs/assets/09_automacao_auditoria_seguranca.png)
+</details>
+
 ### Conclusão de Valor
 A arquitetura do Atlas Server assegura integridade e confidencialidade. A integração com Python permite escalar processos automatizados mantendo o rigor de segurança exigido em infraestruturas corporativas modernas.
 
@@ -103,18 +111,29 @@ A infraestrutura necessitava de um banco NoSQL para persistência de dados não 
 
 ### Evidência Técnica
 
-**1. Tuning de Storage (WiredTiger + XFS):**
+**1. Tuning de Storage & Performance:**
 <details>
-  <summary>📂 Clique para ver a montagem XFS e WiredTiger</summary>
+  <summary>📂 Clique para ver a arquitetura de armazenamento e índices</summary>
 
-  ![Storage WiredTiger](./docs/assets/mongo-storage-wiredtiger-xfs.png)
+  * **Storage WiredTiger + XFS:** ![Storage WiredTiger](docs/assets/mongo-storage-wiredtiger-xfs.png)
+  * **Advanced Indexing (Text/Partial):** ![MongoDB Indexes](docs/assets/m5-mongo-advanced-indexes-text-and-partial-validation.png)
 </details>
 
-**2. Agregação Avançada e Correlação de Dados ($lookup):**
+**2. Governança e Ciclo de Vida do Dado:**
 <details>
-  <summary>📂 Clique para ver a query de agregação de segurança</summary>
+  <summary>📂 Clique para ver TTL, Capped Collections e Agregações</summary>
 
-  ![MongoDB lookup SRE](./docs/assets/mongodb-advanced-lookup-sre.png)
+  * **Data Lifecycle (TTL Index):** ![MongoDB TTL](docs/assets/m5-mongo-ttl-create-index-and-expired-validation-02.png)
+  * **Log Rotation (Capped Collection):** ![Capped Collection](docs/assets/capped-collection-rotatividade-logs.png)
+  * **Advanced Aggregation ($lookup):** ![MongoDB lookup SRE](docs/assets/mongodb-advanced-lookup-sre.png)
+</details>
+
+**3. Integridade Transacional:**
+<details>
+  <summary>📂 Clique para ver operações atômicas e segurança</summary>
+
+  * **Atomic Transactions (findAndModify):** ![Atomic Counter](docs/assets/atomic-counter-findAndModify-id.png)
+  * **Secure Inventory Control:** ![Estoque Atômico](docs/assets/estoque-transacao-atomica-segura.png)
 </details>
 
 ---
