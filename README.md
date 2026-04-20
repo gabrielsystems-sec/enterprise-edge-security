@@ -16,11 +16,13 @@ O ecossistema está sendo construído de forma modular, com as seguintes fases d
 - [ ] **Fase 9: Enterprise Databases & Cache** - Oracle/PL-SQL e Redis.
 
 ## Ambiente de Desenvolvimento
-* **OS:** Ubuntu 24.04 LTS (Argos) - Ambiente nativo para execução de ferramentas CLI.
-* **Virtualization (Rocky Linux 9/Enterprise Linux):** Utilizado como servidor de serviços críticos (Samba, MongoDB, MariaDB) para simular ambientes corporativos isolados via VMware/VirtualBox.
-* **IaC Engine:** Terraform v1.x (HashiCorp) para automação multi-cloud.
-* **Interface:** VS Code com extensões HCL para validação de sintaxe.
-* **Connectivity:** AWS CLI v2 configurado com políticas de acesso restrito (IAM).
+Para a orquestração e gerenciamento de toda a infraestrutura, foi utilizada uma estação de trabalho híbrida:
+
+* **OS Nativo (Ubuntu 24.04 LTS):** Estação de trabalho principal para ferramentas CLI (Terraform, AWS CLI) e Orquestração Cloud-Native (K3s).
+* **Virtualization (Rocky Linux 9):** Servidor de serviços críticos (Samba, MongoDB, MariaDB) para simular ambientes corporativos isolados.
+* **IaC Engine:** Terraform v1.x para automação multi-cloud.
+* **Configuration Management:** Ansible para padronização de instâncias.
+* **Interface:** VS Code com extensões HCL e YAML para validação de sintaxe.
 
 ---
 
@@ -145,15 +147,15 @@ Padronização do hardening e instalação de serviços em escala via **Ansible*
 **1. Gestão e Conectividade:**
 <details>
   <summary>📂 Ver Conexão e Setup</summary>
-  ![Conexão Ansible](./docs/assets/ansible-conexao-sucesso.png)
-  ![Setup Base](./docs/assets/ansible-setup-base-success.png)
+  ![Conexão Ansible](./docs/assets/Captura de tela de 2026-04-18 10-38-02.png)
+  ![Setup Base](./docs/assets/Captura de tela de 2026-04-18 10-48-26.png)
 </details>
 
 **2. Segurança:**
 <details>
   <summary>📂 Ver Hardening Vault e Auditoria</summary>
-  ![Ansible Vault](./docs/assets/ansible-hardening-vault-success.png)
-  ![Auditoria Final](./docs/assets/ansible-final-audit-report-success.png)
+  ![Ansible Vault](./docs/assets/Captura de tela de 2026-04-18 11-13-10.png)
+  ![Auditoria Final](./docs/assets/Captura de tela de 2026-04-18 11-16-17.png)
 </details>
 
 ---
@@ -171,20 +173,20 @@ Bloqueios de escrita e atributos de imutabilidade no Ubuntu experimental.
 **1. Deploy e Resiliência:**
 <details>
   <summary>📂 Ver Cluster e Auto-Healing</summary>
-  ![K8s Success](./docs/assets/k8s-cluster-deployment-success.png)
-  ![Auto Healing](./docs/assets/k8s-auto-healing-test.png)
+  ![K8s Success](./docs/assets/Captura de tela de 2026-04-19 13-05-43.png)
+  ![Auto Healing](./docs/assets/Captura de tela de 2026-04-19 13-14-30.png)
 </details>
 
 **2. Investigação Técnica:**
 <details>
   <summary>📂 Ver Bloqueios e Sanitização APT</summary>
-  ![Filesystem Lock](./docs/assets/filesystem-lock-investigation.png)
-  ![APT Sanitization](./docs/assets/apt-repository-sanitization.png)
+  ![Filesystem Lock](./docs/assets/Captura de tela de 2026-04-19 12-32-13.png)
+  ![APT Sanitization](./docs/assets/Captura de tela de 2026-04-19 12-45-42.png)
 </details>
 
 > [!IMPORTANT]
 > **Lição Aprendida: VIM vs. IDE**
-> Embora o VIM seja vital para ajustes rápidos em servidor, para manifestos K8s e Terraform, a IDE (VS Code) é recomendável para evitar erros de indentação (YAML) invisíveis no terminal.
+> Embora o VIM seja vital para ajustes rápidos em servidor, para manifestos K8s e Terraform, a IDE (VS Code) é mandatória para evitar erros de indentação (YAML) invisíveis no terminal.
 
 ---
 
