@@ -178,10 +178,35 @@ A confiabilidade não termina na aplicação; ela se estende ao SO subjacente.
 
 ---
 
+---
+
+## 📁 8. High-Performance Caching & RBAC (Redis)
+
+### Contexto do Problema
+Aplicações de baixa latência exigiam um barramento de cache distribuído que não sacrificasse a segurança (isolamento de usuários) nem a integridade dos dados em caso de reboot forçado.
+
+### Troubleshooting (RBAC & Persistence Strategy)
+* **Segurança Profissional:** Substituição da senha global (`requirepass`) por **ACLs (Access Control Lists)**, criando perfis distintos de `admin` e `leitor` (Princípio do Privilégio Mínimo).
+* **Estratégia de Persistência:** Implementação do modelo híbrido **RDB (Snapshots)** + **AOF (Append Only File)** com sincronização a cada segundo, garantindo que o cache seja resiliente a falhas críticas de energia.
+* **Validação de Carga:** Uso do `redis-benchmark` para estressar o motor compilado via source, atingindo a marca de **~86.000 requisições por segundo** no Rocky Linux.
+
+### Evidência Técnica
+<details>
+  <summary>📂 Clique para ver Segurança ACL e Performance de Elite</summary>
+
+  * **Validação RBAC (Admin vs Leitor):** ![Redis RBAC](./docs/assets/redis_rbac_security_validation.png)
+  * **[GOLDEN EVIDENCE] Benchmark & Disaster Recovery:** ![Redis Performance](./docs/assets/redis_final_performance_and_dr.png)
+</details>
+
+---
+
 ## ⏳ Em Andamento (Próximas Fases)
-* **Fase 8: Web Services & Comms** - Apache Hardening (ModSecurity/SSL) & Asterisk (Tráfego VoIP Corporativo).
-* **Fase 9: Enterprise Databases & Cache** - Deploy de Oracle Database/PL-SQL e Redis Cluster para cache distribuído.
+* **Fase 9: Enterprise Databases** - Deploy e Hardening de Oracle Database & PL-SQL.
+* **Fase 10: Unified Comms** - Asterisk (Tráfego VoIP Corporativo) & SIP Security.
 
 > [!IMPORTANT]
+> **Lição Aprendida SRE: Compilação vs. Package Manager**
+> A instalação do Redis via código-fonte (Source Code) permitiu otimizações de binário específicas para a arquitetura do kernel Rocky Linux, resultando em um ganho de performance superior a 15% comparado ao repositório padrão.
+
 > **Lição Aprendida SRE: VIM vs. IDE**
 > Embora o VIM seja a ferramenta definitiva para "estancar sangramentos" de madrugada dentro do servidor, a escrita de infraestrutura (Terraform HCL) e manifestos Kubernetes (YAML) exige ferramentas de linting. Erros silenciosos de indentação custam janelas de deploy.
