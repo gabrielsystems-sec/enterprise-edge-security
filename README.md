@@ -207,6 +207,6 @@ Aplicações de baixa latência exigiam um barramento de cache distribuído que 
 > [!IMPORTANT]
 > **Lição Aprendida SRE: Compilação vs. Package Manager**
 > A instalação do Redis via código-fonte (Source Code) permitiu otimizações de binário específicas para a arquitetura do kernel Rocky Linux, resultando em um ganho de performance superior a 15% comparado ao repositório padrão.
-
+>
 > **Lição Aprendida SRE: VIM vs. IDE**
 > Embora o VIM seja a ferramenta definitiva para "estancar sangramentos" de madrugada dentro do servidor, a escrita de infraestrutura (Terraform HCL) e manifestos Kubernetes (YAML) exige ferramentas de linting. Erros silenciosos de indentação custam janelas de deploy.
