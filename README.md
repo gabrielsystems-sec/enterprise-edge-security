@@ -216,7 +216,7 @@ Implementação de uma central telefônica IP com gestão de filas de suporte, g
 
   * **Success Deploy:** ![Asterisk CLI](./docs/assets/asterisk_cli_installation_success.png)
   * **Troubleshooting Logs:** ![Journalctl Asterisk](./docs/assets/asterisk_troubleshooting_journalctl.png)
-  * **Conectividade PJSIP:** ![PJSIP Hardening](./docs/assets/01_asterisk_pjsip_conectividade_hardening.jpg)
+  * **Conectividade PJSIP:** ![PJSIP Hardening](./docs/assets/01_asterisk_pjsip_conectividade_hardening.png)
   * **[GOLDEN] URA & MixMonitor:** ![Call Flow](./docs/assets/02_asterisk_fluxo_ura_monitoramento.png)
   * **Integridade das Gravações:** ![Recording Integrity](./docs/assets/03_asterisk_operacao_integridade_gravacoes.png)
 </details>
