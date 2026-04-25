@@ -162,33 +162,14 @@ Deploy do K3s apresentando falhas crônicas de "Operation not permitted" em sist
 
 ---
 
-## 📁 SRE Deep Dive: Monitoramento de Kernel (OOM-Killer)
-
-A confiabilidade não termina na aplicação; ela se estende ao SO subjacente.
-* **O Incidente:** Serviços sofrendo *kill* súbito sem logs de aplicação.
-* **Investigação SRE:** Leitura do ring buffer do kernel via `dmesg`, identificando o **Out of Memory (OOM) Killer** agindo sobre processos pesados.
-* **Ação Corretiva:** Alocação de arquivo `swap` emergencial de 8GB a quente (`fallocate` + `mkswap`) para salvar a estabilidade do nó.
-
-<details>
-  <summary>📂 Clique para ver os Logs de Kernel e Ação a Quente</summary>
-
-  * **Log do Kernel (OOM):** ![OOM Killer](./docs/assets/linux-kernel-log-oom-killer-hytale.png)
-  * **Swap Resize A Quente:** ![Swap 8GB](./docs/assets/ubuntu-swap-resize-8gb-active.png)
-</details>
-
----
-
----
-
 ## 📁 8. High-Performance Caching & RBAC (Redis)
 
 ### Contexto do Problema
 Aplicações de baixa latência exigiam um barramento de cache distribuído que não sacrificasse a segurança (isolamento de usuários) nem a integridade dos dados em caso de reboot forçado.
 
 ### Troubleshooting (RBAC & Persistence Strategy)
-* **Segurança Profissional:** Substituição da senha global (`requirepass`) por **ACLs (Access Control Lists)**, criando perfis distintos de `admin` e `leitor` (Princípio do Privilégio Mínimo).
-* **Estratégia de Persistência:** Implementação do modelo híbrido **RDB (Snapshots)** + **AOF (Append Only File)** com sincronização a cada segundo, garantindo que o cache seja resiliente a falhas críticas de energia.
-* **Validação de Carga:** Uso do `redis-benchmark` para estressar o motor compilado via source, atingindo a marca de **~86.000 requisições por segundo** no Rocky Linux.
+* **Segurança Profissional:** Substituição da senha global (`requirepass`) por **ACLs (Access Control Lists)**, seguindo o Princípio do Privilégio Mínimo.
+* **Estratégia de Persistência:** Modelo híbrido RDB + AOF com sincronização a cada segundo.
 
 ### Evidência Técnica
 <details>
@@ -200,13 +181,64 @@ Aplicações de baixa latência exigiam um barramento de cache distribuído que 
 
 ---
 
-## ⏳ Em Andamento (Próximas Fases)
-* **Fase 9: Enterprise Databases** - Deploy e Hardening de Oracle Database & PL-SQL.
-* **Fase 10: Unified Comms** - Asterisk (Tráfego VoIP Corporativo) & SIP Security.
+## 📁 9. Enterprise Databases (Oracle Database 19c)
+
+### Contexto do Problema
+Preparação de ambiente crítico para alta disponibilidade de dados estruturados, exigindo ajustes finos de Kernel e isolamento de recursos.
+
+### Troubleshooting (Kernel Tuning & Storage)
+* **Causa Raiz:** O instalador do Oracle exige limites de memória compartilhada (`shmmax`) e descritores de arquivos específicos.
+* **Resolução:** Automação da preparação via scripts de variáveis de ambiente (`setEnvOracle.sh`), criação de pontos de montagem dedicados (`/u01`) e persistência via `sysctl.conf`.
+
+### Evidência Técnica
+<details>
+  <summary>📂 Clique para ver Automação e Tuning de Kernel</summary>
+
+  * **Prep & Variáveis:** ![Oracle Prep](./docs/assets/01_infra_prep_oracle_env_automation.png)
+  * **Storage & Ulimit:** ![Storage Validation](./docs/assets/02_system_tuning_storage_validation.png)
+  * **Kernel Verification:** ![Kernel Tuning](./docs/assets/03_kernel_tuning_verification.png)
+</details>
+
+---
+
+## 📁 10. [GOLDEN EVIDENCE] Unified Comms & SIP Security (Asterisk)
+
+### Contexto do Problema
+Implementação de uma central telefônica IP com gestão de filas de suporte, gravação compulsória e URA interativa (IVR).
+
+### Troubleshooting (Post-Mortem: Systemd & DTMF)
+* **Incidente:** Serviço Asterisk falhando no boot via LSB.
+* **Resolução:** Migração para gerenciamento nativo via Systemd e correção de `dtmf_mode` para RFC 2833 no Zoiper para garantir a funcionalidade da URA.
+
+### Evidência Técnica
+<details>
+  <summary>📂 Clique para ver Instalação, Fluxo e Integridade</summary>
+
+  * **Success Deploy:** ![Asterisk CLI](./docs/assets/asterisk_cli_installation_success.png)
+  * **Troubleshooting Logs:** ![Journalctl Asterisk](./docs/assets/asterisk_troubleshooting_journalctl.png)
+  * **Conectividade PJSIP:** ![PJSIP Hardening](./docs/assets/01_asterisk_pjsip_conectividade_hardening.jpg)
+  * **[GOLDEN] URA & MixMonitor:** ![Call Flow](./docs/assets/02_asterisk_fluxo_ura_monitoramento.png)
+  * **Integridade das Gravações:** ![Recording Integrity](./docs/assets/03_asterisk_operacao_integridade_gravacoes.png)
+</details>
+
+---
+
+## 📁 SRE Deep Dive: Monitoramento de Kernel (OOM-Killer)
+
+A confiabilidade não termina na aplicação; ela se estende ao SO subjacente.
+* **O Incidente:** Serviços sofrendo *kill* súbito sem logs de aplicação.
+* **Investigação SRE:** Leitura do ring buffer do kernel via `dmesg`, identificando o **Out of Memory (OOM) Killer**.
+* **Ação Corretiva:** Alocação de arquivo `swap` emergencial de 8GB a quente (`fallocate` + `mkswap`).
+
+<details>
+  <summary>📂 Clique para ver os Logs de Kernel e Ação a Quente</summary>
+
+  * **Log do Kernel (OOM):** ![OOM Killer](./docs/assets/linux-kernel-log-oom-killer-hytale.png)
+  * **Swap Resize A Quente:** ![Swap 8GB](./docs/assets/ubuntu-swap-resize-8gb-active.png)
+</details>
+
+---
 
 > [!IMPORTANT]
-> **Lição Aprendida SRE: Compilação vs. Package Manager**
-> A instalação do Redis via código-fonte (Source Code) permitiu otimizações de binário específicas para a arquitetura do kernel Rocky Linux, resultando em um ganho de performance superior a 15% comparado ao repositório padrão.
->
-> **Lição Aprendida SRE: VIM vs. IDE**
-> Embora o VIM seja a ferramenta definitiva para "estancar sangramentos" de madrugada dentro do servidor, a escrita de infraestrutura (Terraform HCL) e manifestos Kubernetes (YAML) exige ferramentas de linting. Erros silenciosos de indentação custam janelas de deploy.
+> **Lição Aprendida SRE: Conclusão da Jornada**
+> Este repositório encerra um ciclo de estudos iniciado em Novembro de 2025 e finalizado em Abril de 2026. A infraestrutura não é um estado estático, mas um ecossistema vivo que exige monitoramento contínuo, governança rigorosa e a humildade de investigar a causa raiz de cada falha. Próximo passo: Segurança Defensiva com Wazuh.
