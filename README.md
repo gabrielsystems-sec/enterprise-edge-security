@@ -1,244 +1,265 @@
 # Enterprise Edge & Services Infrastructure 🛡️
 
-Repositório dedicado à construção, orquestração e administração de uma infraestrutura corporativa completa (Híbrida/Cloud). Este laboratório documenta a transição de serviços tradicionais de rede e armazenamento para um ecossistema **Cloud-Native**, focado em **IaC, Automação, Alta Disponibilidade e Cultura SRE**.
+Laboratório de infraestrutura corporativa que reúne serviços de rede, bancos de dados, automação, IaC e workloads Cloud-Native. O projeto documenta implementações práticas, falhas encontradas durante os testes e os processos de troubleshooting aplicados para restaurar os serviços.
 
-## 🎯 Business Value & Segurança
-O objetivo principal deste projeto é garantir que **dados corporativos estejam seguros (Data-at-Rest Encryption)**, que a infraestrutura seja **mutável apenas via código (Terraform/Ansible)**, e que os serviços críticos tenham **recuperação automática (Auto-healing)** contra falhas operacionais.
+## Foco do Laboratório
 
----
-
-## Stack Tecnológica & Matriz de Arquitetura
-* **Cloud & Orquestração:** AWS, Terraform, Kubernetes (K3s), Docker.
-* **Sistemas Operacionais:** Ubuntu 24.04 LTS (Control Plane) & Rocky Linux 9 (Data Nodes).
-* **Governança & Automação:** Ansible Vault, Python Scripts, SELinux, ModSecurity.
-
-### Matriz de Serviços Corporativos
-| Camada | Tecnologia Principal | Estratégia de Persistência/Segurança | Função no Ecossistema |
-| :--- | :--- | :--- | :--- |
-| **Infra as Code** | Terraform & AWS | State Lock / IAM Roles | Provisionamento Declarativo Multi-Cloud |
-| **Automação** | Ansible Vault | AES-256 Encryption | Padronização de Servidores e Segredos |
-| **Orquestração** | K3s (Kubernetes)| Auto-Healing / RBAC | Alta Disponibilidade de Microsserviços |
-| **NoSQL Storage** | MongoDB 8.0 | XFS Storage / TTL Indexes | Cache, Alta Volumetria e Logs Temporários |
-| **SQL Database** | MariaDB | Data-at-Rest (SHA512/AES) | Dados Estruturados e Auditoria Financeira |
-| **File Services** | Samba Share | SELinux Contexts (`samba_share_t`) | Compartilhamento Corporativo Isolado |
+- Automação e infraestrutura como código
+- Serviços corporativos e bancos de dados
+- Containers e Kubernetes
+- Segurança e controle de acesso
+- Troubleshooting e investigação de falhas
+- Resiliência e recuperação de serviços
 
 ---
 
-## 📁 1. Secure File Services (Samba & SELinux)
+## Stack Tecnológica
 
-### Contexto do Problema
-O ecossistema demandava um servidor de arquivos capaz de isolar dados sensíveis entre setores, operando estritamente dentro das políticas de acesso do SO.
+**Cloud & IaC:** AWS, Terraform, Ansible  
+**Containers & Orquestração:** Docker, K3s (Kubernetes)  
+**Sistemas:** Ubuntu 24.04 LTS, Rocky Linux 9  
+**Bancos & Cache:** MariaDB, MongoDB, Redis, Oracle Database 19c  
+**Segurança:** SELinux, Ansible Vault, ModSecurity, RBAC  
+**Serviços:** Samba, Asterisk  
 
-### Troubleshooting e Resolução
-* **Solução Aplicada:** Configuração de diretórios com permissões granulares (`0770`), bloqueio via Firewall nativo (Firewalld) e implementação de contextos do **SELinux** para mitigar acessos não autorizados por processos não catalogados.
+---
 
-### Evidência Técnica
+# 1. Serviços e Dados
+
+## Secure File Services — Samba & SELinux
+
+Implementação de um servidor de arquivos com permissões granulares, controle via Firewalld e integração com contextos do SELinux.
+
+**Tecnologias:** Samba, SELinux, Firewalld
+
 <details>
-  <summary>📂 Clique para ver a Configuração e Validação de Acesso</summary>
+<summary>Ver evidências técnicas</summary>
 
-  * **Hardening no smb.conf:** ![Samba Config](./docs/assets/06_samba_config_validation.png)
-  * **Acesso Efetivo:** ![Samba Access](./docs/assets/01_samba_access_success.png)
+![Samba Config](./docs/assets/06_samba_config_validation.png)
+
+![Samba Access](./docs/assets/01_samba_access_success.png)
+
 </details>
 
 ---
 
-## 📁 2. Relational Databases & Governance (MariaDB)
+## MariaDB — Troubleshooting, Auditoria & Recovery
 
-### Contexto do Problema
-Garantir integridade, rastreabilidade total (Auditoria) e capacidade de recuperação (Disaster Recovery) em um banco de dados relacional crítico.
+Durante testes de resiliência, o banco apresentou falha com `exit-code=1`.
 
-### Troubleshooting (Post-Mortem: Systemd & Socket)
-Durante testes de resiliência, o banco apresentou falha crítica (`exit-code=1`).
-* **Causa Raiz:** Crash do sistema gerou PIDs corrompidos e um socket órfão (`mysql.sock`).
-* **Resolução:** Limpeza manual profunda em `/var/lib/mysql`, expurgo do socket, reset de propriedades de usuário e restart limpo do daemon via `systemctl`.
+**Causa raiz:** PIDs corrompidos e um socket `mysql.sock` órfão após um crash do sistema.
 
-### Evidência Técnica
+**Resolução:** Limpeza dos arquivos residuais em `/var/lib/mysql`, remoção do socket e reinicialização controlada do serviço.
+
+Também foram realizados testes de criptografia, auditoria, integração com Python e recuperação do banco.
+
 <details>
-  <summary>📂 Clique para ver Resolução, Auditoria e Criptografia</summary>
+<summary>Ver evidências técnicas</summary>
 
-  * **O Incidente (Socket SRE):** ![Resolucao Socket](./docs/assets/04_resolucao_conflito_porta_causa_raiz.png)
-  * **Criptografia AES/SHA512:** ![Criptografia](./docs/assets/criptografia_avancada_sha512_aes.png)
-  * **Integração Python:** ![Automação Python](./docs/assets/evidencia_ouro_integracao_python_mariadb.png)
-  * **Auditoria em Tempo Real:** ![Log Auditoria](./docs/assets/auditoria_tempo_real.png)
-  * **Disaster Recovery (Success):** ![Recovery](./docs/assets/08_recovery_sucesso_database.png)
+![Resolucao Socket](./docs/assets/04_resolucao_conflito_porta_causa_raiz.png)
+
+![Criptografia](./docs/assets/criptografia_avancada_sha512_aes.png)
+
+![Automação Python](./docs/assets/evidencia_ouro_integracao_python_mariadb.png)
+
+![Recovery](./docs/assets/08_recovery_sucesso_database.png)
+
 </details>
 
 ---
 
-## 📁 3. NoSQL & Scalability (MongoDB 8.0)
+## MongoDB 8.0 — Storage, TTL & SELinux
 
-### Contexto do Problema
-Necessidade de gravação ultrarrápida no nível do SO (XFS) e expiração automática de dados temporários para evitar saturação de disco.
+Implementação de MongoDB com foco em armazenamento XFS, ciclo de vida de dados temporários e troubleshooting em ambiente com SELinux `Enforcing`.
 
-### Troubleshooting (SELinux Enforcing)
-O daemon `mongod` sofria bloqueios silenciosos do sistema.
-* **Causa Raiz:** O SELinux em modo `Enforcing` bloqueava operações de rede e gravação não padrão.
-* **Mitigação:** Análise do `audit.log` com `ausearch` e compilação de um módulo customizado de liberação via `audit2allow -M`.
+O daemon sofreu bloqueios relacionados às políticas de segurança. A investigação utilizou `audit.log` e `ausearch`, seguida da criação de um módulo específico com `audit2allow`.
 
-### Evidência Técnica
+Também foi implementado TTL Index para expiração automática de dados temporários.
+
 <details>
-  <summary>📂 Clique para ver Troubleshooting, Storage e TTL</summary>
+<summary>Ver evidências técnicas</summary>
 
-  * **Bloqueio SELinux:** ![Ausearch](./docs/assets/ausearch-denied-selinux-mongod.png)
-  * **Criação de Módulo:** ![Audit2Allow](./docs/assets/systemctl-status-failed-retry.png)
-  * **Performance XFS:** ![Storage XFS](./docs/assets/mongo-storage-wiredtiger-xfs.png)
-  * **Ciclo de Vida (TTL):** ![TTL Index](./docs/assets/m5-mongo-ttl-create-index-and-expired-validation-02.png)
+![SELinux](./docs/assets/ausearch-denied-selinux-mongod.png)
+
+![XFS](./docs/assets/mongo-storage-wiredtiger-xfs.png)
+
+![TTL](./docs/assets/m5-mongo-ttl-create-index-and-expired-validation-02.png)
+
 </details>
 
 ---
 
-## 📁 4. Containerization & Isolation (Docker)
+## Redis — RBAC, Performance & Persistência
 
-### Contexto do Problema
-Isolamento rigoroso de dependências (Python + DB) para pipelines de CI/CD, garantindo portabilidade.
+Implementação de Redis com substituição da senha global por ACLs, seguindo o princípio do menor privilégio.
 
-### Evidência Técnica
+A persistência foi configurada utilizando o modelo híbrido RDB + AOF, com testes de benchmark e recuperação.
+
 <details>
-  <summary>📂 Clique para ver Deploy de Contêineres</summary>
+<summary>Ver evidências técnicas</summary>
 
-  * **Isolamento de DB:** ![Docker Auth](./docs/assets/mongo-docker-container-auth.png)
-  * **Rede Blue Team (Compose):** ![Docker Compose](./docs/assets/lab-docker-compose-multi-service-python-mongo.png)
+![Redis RBAC](./docs/assets/redis_rbac_security_validation.png)
+
+![Redis Performance](./docs/assets/redis_final_performance_and_dr.png)
+
 </details>
 
 ---
 
-## 📁 5. Infrastructure as Code (Terraform na AWS)
+## Oracle Database 19c — Kernel & Storage Tuning
 
-### Contexto do Problema
-A eliminação do "Cloud Drift" (mudanças manuais em produção) exigia que a topologia (EC2, VPC, ELB) fosse declarada em HCL.
+Preparação de ambiente para Oracle Database com ajustes de kernel, memória compartilhada, descritores de arquivos e armazenamento dedicado.
 
-### Troubleshooting (API AWS)
-* **Incidente:** Erro de provisionamento `InvalidParameterCombination`.
-* **Causa Raiz:** Solicitação de uma classe de instância incompatível com as restrições de sub-rede e Free Tier da AWS.
-* **Resolução:** Refatoração do `main.tf` adaptando os requisitos do Cloud Provider.
+A configuração foi automatizada com scripts de ambiente e parâmetros persistentes via `sysctl.conf`.
 
-### Evidência Técnica
 <details>
-  <summary>📂 Clique para ver o Ciclo IaC e Validação</summary>
+<summary>Ver evidências técnicas</summary>
 
-  * **AWS API Log Error:** ![Free Tier Error](./docs/assets/error-aws-free-tier-validation.png)
-  * **Terraform Plan:** ![Plan](./docs/assets/05-terraform-plan-update.png)
-  * **Terraform Apply:** ![Apply](./docs/assets/06-terraform-apply-final.png)
+![Oracle Prep](./docs/assets/01_infra_prep_oracle_env_automation.png)
+
+![Kernel Tuning](./docs/assets/03_kernel_tuning_verification.png)
+
 </details>
 
 ---
 
-## 📁 6. Enterprise Automation (Ansible Vault)
+# 2. Automação e Infraestrutura como Código
 
-### Diferenciais de Engenharia
-* **Idempotência:** Playbooks garantem que os servidores atinjam o "estado desejado" de hardening sem retrabalho.
-* **Ansible Vault:** Proteção de nível militar para não expor credenciais em texto plano nos repositórios.
+## Docker — Containerização e Isolamento
 
-### Evidência Técnica
+Laboratório de isolamento de serviços e dependências utilizando containers e Docker Compose para integração entre Python e MongoDB.
+
 <details>
-  <summary>📂 Clique para ver Automação e Auditoria</summary>
+<summary>Ver evidências técnicas</summary>
 
-  * **Conexão Base:** ![Ping](./docs/assets/ansible-conexao-sucesso.png)
-  * **Execução Segura (Vault):** ![Vault Run](./docs/assets/ansible_hardening_vault_success.png)
-  * **Auditoria Pós-Automação:** ![Audit Report](./docs/assets/ansible-final-audit-report-success.png)
+![Docker Auth](./docs/assets/mongo-docker-container-auth.png)
+
+![Docker Compose](./docs/assets/lab-docker-compose-multi-service-python-mongo.png)
+
 </details>
 
 ---
 
-## 📁 7. [GOLDEN EVIDENCE] Cloud-Native (Kubernetes SRE)
+## Terraform — AWS Infrastructure as Code
 
-### Contexto do Problema
-Garantir alta disponibilidade e recuperação autônoma de pods.
+Provisionamento declarativo de recursos AWS utilizando Terraform.
 
-### Troubleshooting (Filesystem Lock no Bare Metal)
-Deploy do K3s apresentando falhas crônicas de "Operation not permitted" em sistema operando como root.
-* **Investigação SRE:** Uso de análise avançada de SO (`lsattr`) para detectar atributos ocultos no FS.
-* **Causa Raiz:** O arquivo `sources.list` possuía atributo de imutabilidade (`+i`), resquício de hardening prévio.
-* **Resolução:** Remoção manual da imutabilidade com `chattr -i` e sanitização de repositórios.
+Durante o provisionamento, foi identificado o erro `InvalidParameterCombination`.
 
-### Evidência Técnica
+**Causa raiz:** Incompatibilidade entre a classe da instância solicitada e as restrições do ambiente AWS.
+
+**Resolução:** Ajuste do `main.tf` e revalidação do plano antes da aplicação da infraestrutura.
+
 <details>
-  <summary>📂 Clique para ver Troubleshooting e Cluster Ativo</summary>
+<summary>Ver evidências técnicas</summary>
 
-  * **Investigação FS (chattr):** ![Chattr Lock](./docs/assets/filesystem-lock-investigation.png)
-  * **Cluster Subindo:** ![K3s Setup](./docs/assets/k8s-cluster-deployment-success.png)
-  * **Teste de Resiliência:** ![Auto Healing](./docs/assets/k8s-auto-healing-test.png)
+![Terraform Error](./docs/assets/error-aws-free-tier-validation.png)
+
+![Terraform Plan](./docs/assets/05-terraform-plan-update.png)
+
+![Terraform Apply](./docs/assets/06-terraform-apply-final.png)
+
 </details>
 
 ---
 
-## 📁 8. High-Performance Caching & RBAC (Redis)
+## Ansible — Automação e Vault
 
-### Contexto do Problema
-Aplicações de baixa latência exigiam um barramento de cache distribuído que não sacrificasse a segurança (isolamento de usuários) nem a integridade dos dados em caso de reboot forçado.
+Automação da configuração e hardening de servidores utilizando playbooks idempotentes.
 
-### Troubleshooting (RBAC & Persistence Strategy)
-* **Segurança Profissional:** Substituição da senha global (`requirepass`) por **ACLs (Access Control Lists)**, seguindo o Princípio do Privilégio Mínimo.
-* **Estratégia de Persistência:** Modelo híbrido RDB + AOF com sincronização a cada segundo.
+Credenciais e informações sensíveis foram protegidas com Ansible Vault.
 
-### Evidência Técnica
 <details>
-  <summary>📂 Clique para ver Segurança ACL e Performance de Elite</summary>
+<summary>Ver evidências técnicas</summary>
 
-  * **Validação RBAC (Admin vs Leitor):** ![Redis RBAC](./docs/assets/redis_rbac_security_validation.png)
-  * **[GOLDEN EVIDENCE] Benchmark & Disaster Recovery:** ![Redis Performance](./docs/assets/redis_final_performance_and_dr.png)
+![Ansible Ping](./docs/assets/ansible-conexao-sucesso.png)
+
+![Vault](./docs/assets/ansible_hardening_vault_success.png)
+
+![Audit](./docs/assets/ansible-final-audit-report-success.png)
+
 </details>
 
 ---
 
-## 📁 9. Enterprise Databases (Oracle Database 19c)
+# 3. Cloud-Native
 
-### Contexto do Problema
-Preparação de ambiente crítico para alta disponibilidade de dados estruturados, exigindo ajustes finos de Kernel e isolamento de recursos.
+## K3s — Kubernetes & Auto-Healing
 
-### Troubleshooting (Kernel Tuning & Storage)
-* **Causa Raiz:** O instalador do Oracle exige limites de memória compartilhada (`shmmax`) e descritores de arquivos específicos.
-* **Resolução:** Automação da preparação via scripts de variáveis de ambiente (`setEnvOracle.sh`), criação de pontos de montagem dedicados (`/u01`) e persistência via `sysctl.conf`.
+Implementação de um cluster K3s com testes de recuperação automática de workloads.
 
-### Evidência Técnica
+Durante o deployment, ocorreu uma falha de permissões no sistema de arquivos.
+
+**Investigação:** `lsattr` identificou que um arquivo possuía o atributo de imutabilidade `+i`.
+
+**Resolução:** Remoção controlada do atributo com `chattr -i`, saneamento dos repositórios e conclusão da instalação.
+
 <details>
-  <summary>📂 Clique para ver Automação e Tuning de Kernel</summary>
+<summary>Ver evidências técnicas</summary>
 
-  * **Prep & Variáveis:** ![Oracle Prep](./docs/assets/01_infra_prep_oracle_env_automation.png)
-  * **Storage & Ulimit:** ![Storage Validation](./docs/assets/02_system_tuning_storage_validation.png)
-  * **Kernel Verification:** ![Kernel Tuning](./docs/assets/03_kernel_tuning_verification.png)
+![Filesystem Investigation](./docs/assets/filesystem-lock-investigation.png)
+
+![K3s Setup](./docs/assets/k8s-cluster-deployment-success.png)
+
+![Auto Healing](./docs/assets/k8s-auto-healing-test.png)
+
 </details>
 
 ---
 
-## 📁 10. [GOLDEN EVIDENCE] Unified Comms & SIP Security (Asterisk)
+# 4. Comunicação Corporativa
 
-### Contexto do Problema
-Implementação de uma central telefônica IP com gestão de filas de suporte, gravação compulsória e URA interativa (IVR).
+## Asterisk — SIP, URA & Gravação
 
-### Troubleshooting (Post-Mortem: Systemd & DTMF)
-* **Incidente:** Serviço Asterisk falhando no boot via LSB.
-* **Resolução:** Migração para gerenciamento nativo via Systemd e correção de `dtmf_mode` para RFC 2833 no Zoiper para garantir a funcionalidade da URA.
+Implementação de uma central telefônica IP com filas, URA interativa e gravação de chamadas.
 
-### Evidência Técnica
+Durante os testes, o serviço apresentou falha no boot e problemas relacionados ao DTMF.
+
+A resolução envolveu a migração para gerenciamento nativo via Systemd e ajustes no `dtmf_mode` para RFC 2833.
+
 <details>
-  <summary>📂 Clique para ver Instalação, Fluxo e Integridade</summary>
+<summary>Ver evidências técnicas</summary>
 
-  * **Success Deploy:** ![Asterisk CLI](./docs/assets/asterisk_cli_installation_success.png)
-  * **Troubleshooting Logs:** ![Journalctl Asterisk](./docs/assets/asterisk_troubleshooting_journalctl.png)
-  * **Conectividade PJSIP:** ![PJSIP Hardening](./docs/assets/01_asterisk_pjsip_conectividade_hardening.png)
-  * **[GOLDEN] URA & MixMonitor:** ![Call Flow](./docs/assets/02_asterisk_fluxo_ura_monitoramento.png)
-  * **Integridade das Gravações:** ![Recording Integrity](./docs/assets/03_asterisk_operacao_integridade_gravacoes.png)
+![Asterisk CLI](./docs/assets/asterisk_cli_installation_success.png)
+
+![Asterisk Troubleshooting](./docs/assets/asterisk_troubleshooting_journalctl.png)
+
+![Call Flow](./docs/assets/02_asterisk_fluxo_ura_monitoramento.png)
+
 </details>
 
 ---
 
-## 📁 SRE Deep Dive: Monitoramento de Kernel (OOM-Killer)
+# 5. SRE Incident — OOM Killer
 
-A confiabilidade não termina na aplicação; ela se estende ao SO subjacente.
-* **O Incidente:** Serviços sofrendo *kill* súbito sem logs de aplicação.
-* **Investigação SRE:** Leitura do ring buffer do kernel via `dmesg`, identificando o **Out of Memory (OOM) Killer**.
-* **Ação Corretiva:** Alocação de arquivo `swap` emergencial de 8GB a quente (`fallocate` + `mkswap`).
+Durante os testes, serviços apresentaram encerramento súbito sem registros claros na aplicação.
+
+A investigação foi realizada no ring buffer do kernel com `dmesg`, identificando a atuação do **OOM Killer**.
+
+**Ação corretiva:** criação de um arquivo Swap emergencial de 8 GB sem reinicialização do sistema.
 
 <details>
-  <summary>📂 Clique para ver os Logs de Kernel e Ação a Quente</summary>
+<summary>Ver evidências técnicas</summary>
 
-  * **Log do Kernel (OOM):** ![OOM Killer](./docs/assets/linux-kernel-log-oom-killer-hytale.png)
-  * **Swap Resize A Quente:** ![Swap 8GB](./docs/assets/ubuntu-swap-resize-8gb-active.png)
+![OOM Killer](./docs/assets/linux-kernel-log-oom-killer-hytale.png)
+
+![Swap](./docs/assets/ubuntu-swap-resize-8gb-active.png)
+
 </details>
 
 ---
 
-> [!IMPORTANT]
-> **Lição Aprendida SRE: Conclusão da Jornada**
-> Este repositório encerra um ciclo de estudos iniciado em Novembro de 2025 e finalizado em Abril de 2026. A infraestrutura não é um estado estático, mas um ecossistema vivo que exige monitoramento contínuo, governança rigorosa e a humildade de investigar a causa raiz de cada falha. Próximo passo: Segurança Defensiva com Wazuh.
+## Principais Aprendizados
+
+Este laboratório reúne implementações e incidentes que exigiram análise de logs, investigação de causa raiz, automação e recuperação de serviços.
+
+Os principais temas trabalhados foram:
+
+- Troubleshooting de serviços Linux
+- SELinux e controle de acesso
+- Bancos de dados relacionais e NoSQL
+- Terraform e Ansible
+- Containers e Kubernetes
+- RBAC e persistência de dados
+- Kernel tuning e análise do OOM Killer
+- Recuperação e resiliência de serviços
